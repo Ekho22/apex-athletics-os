@@ -40,7 +40,6 @@ declare module 'hono' {
 
 type ClerkBindings = {
   CLERK_SECRET_KEY: string;
-  CLERK_PUBLISHABLE_KEY?: string;
 };
 
 // Cache for JWKS to avoid fetching on every request
