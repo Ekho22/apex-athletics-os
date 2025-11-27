@@ -1,0 +1,219 @@
+/* Apex Athletics OS - Main Styles */
+
+/* CSS Variables */
+:root {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-secondary: #64748b;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --border-radius: 8px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+/* Dashboard styles */
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+.dashboard--loading,
+.dashboard--error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.dashboard__spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--color-secondary);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dashboard__header {
+  margin-bottom: var(--spacing-xl);
+}
+
+.dashboard__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.dashboard__subtitle {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.dashboard__section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+}
+
+.dashboard__scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.dashboard__empty {
+  text-align: center;
+  padding: var(--spacing-xl);
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  color: var(--color-text-secondary);
+}
+
+.dashboard__retry-button {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.dashboard__retry-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Score Panel styles */
+.score-panel {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.score-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.score-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.score-panel__category {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-transform: capitalize;
+}
+
+.score-panel__trend {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.score-panel__trend--up {
+  color: var(--color-success);
+}
+
+.score-panel__trend--down {
+  color: var(--color-error);
+}
+
+.score-panel__trend--stable {
+  color: var(--color-secondary);
+}
+
+.score-panel__body {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: var(--spacing-md);
+}
+
+.score-panel__value {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.score-panel__value--excellent {
+  color: var(--color-success);
+}
+
+.score-panel__value--good {
+  color: var(--color-primary);
+}
+
+.score-panel__value--fair {
+  color: var(--color-warning);
+}
+
+.score-panel__value--needs-improvement {
+  color: var(--color-error);
+}
+
+.score-panel__unit {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin-left: var(--spacing-xs);
+}
+
+.score-panel__footer {
+  margin-bottom: var(--spacing-sm);
+}
+
+.score-panel__updated {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.score-panel__progress {
+  height: 6px;
+  background-color: var(--color-background);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.score-panel__progress-bar {
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}

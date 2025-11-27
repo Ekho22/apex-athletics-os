@@ -1,0 +1,11 @@
+name = "apex-athletics-api"
+main = "apps/api/src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "development"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "apex-athletics-db"
+database_id = "placeholder-database-id"
