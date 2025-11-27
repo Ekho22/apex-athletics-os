@@ -127,4 +127,50 @@ userRoutes.delete('/:id', async (c) => {
   }
 });
 
+// Get user scores
+userRoutes.get('/:id/scores', async (c) => {
+  const id = c.req.param('id');
+
+  try {
+    const { results } = await c.env.DB.prepare(
+      `SELECT category, score as value, recorded_at as recordedAt 
+       FROM athlete_scores 
+       WHERE user_id = ? 
+       ORDER BY recorded_at DESC`
+    ).bind(id).all();
+
+    // Group scores by category and calculate trends
+    const categoryScores: Record<string, { values: number[]; latestDate: string }> = {};
+    
+    for (const row of results as { category: string; value: number; recordedAt: string }[]) {
+      if (!categoryScores[row.category]) {
+        categoryScores[row.category] = { values: [], latestDate: row.recordedAt };
+      }
+      categoryScores[row.category].values.push(row.value);
+    }
+
+    const scores = Object.entries(categoryScores).map(([category, data]) => {
+      const values = data.values;
+      let trend: 'up' | 'down' | 'stable' = 'stable';
+      
+      if (values.length >= 2) {
+        const diff = values[0] - values[1];
+        if (diff > 0) trend = 'up';
+        else if (diff < 0) trend = 'down';
+      }
+
+      return {
+        category,
+        value: values[0],
+        trend,
+        lastUpdated: data.latestDate,
+      };
+    });
+
+    return c.json({ scores });
+  } catch (error) {
+    return c.json({ error: 'Failed to fetch user scores' }, 500);
+  }
+});
+
 export default userRoutes;

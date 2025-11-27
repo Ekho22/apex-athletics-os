@@ -22,6 +22,60 @@ interface StripeEvent {
   };
 }
 
+/**
+ * Verifies the Stripe webhook signature using HMAC-SHA256.
+ * This ensures the webhook was sent by Stripe and hasn't been tampered with.
+ */
+async function verifyStripeSignature(
+  payload: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+  // Parse the signature header
+  const elements = signature.split(',');
+  const signatureMap: Record<string, string> = {};
+  
+  for (const element of elements) {
+    const [key, value] = element.split('=');
+    signatureMap[key] = value;
+  }
+
+  const timestamp = signatureMap['t'];
+  const v1Signature = signatureMap['v1'];
+
+  if (!timestamp || !v1Signature) {
+    return false;
+  }
+
+  // Check timestamp to prevent replay attacks (5 minute tolerance)
+  const timestampAge = Math.floor(Date.now() / 1000) - parseInt(timestamp, 10);
+  if (timestampAge > 300) {
+    return false;
+  }
+
+  // Compute expected signature
+  const signedPayload = `${timestamp}.${payload}`;
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(signedPayload);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+  const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  // Use timing-safe comparison
+  return expectedSignature === v1Signature;
+}
+
 const billingWebhookRoutes = new Hono<{ Bindings: Bindings }>();
 
 // Stripe webhook handler
@@ -33,10 +87,21 @@ billingWebhookRoutes.post('/', async (c) => {
       return c.json({ error: 'Missing Stripe signature' }, 400);
     }
 
-    // In production, verify the webhook signature with Stripe
-    // const event = stripe.webhooks.constructEvent(body, signature, c.env.STRIPE_WEBHOOK_SECRET);
+    const rawBody = await c.req.text();
     
-    const event = await c.req.json<StripeEvent>();
+    // Verify the webhook signature
+    const isValid = await verifyStripeSignature(
+      rawBody,
+      signature,
+      c.env.STRIPE_WEBHOOK_SECRET
+    );
+
+    if (!isValid) {
+      console.error('Invalid Stripe webhook signature');
+      return c.json({ error: 'Invalid signature' }, 401);
+    }
+    
+    const event: StripeEvent = JSON.parse(rawBody);
 
     switch (event.type) {
       case 'payment_intent.succeeded': {
